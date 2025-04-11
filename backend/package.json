@@ -2,21 +2,20 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
+  "type": "module",
   "scripts": {
-    "start": "node -r dotenv/config --experimental-json-modules index.js"
+    "test": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
+    "seed": "node -r dotenv/config --experimental-json-modules src/db/seed.js"
   },
   "keywords": [],
-  "author": "Abhishek Saikia",
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "mongodb": "^6.15.0",
-    "mongoose": "^8.13.2"
-  },
-  "devDependencies": {
-    "@types/node": "^22.14.0"
+    "mongoose": "^8.13.2",
+    "nodemon": "^3.1.9"
   }
 }
