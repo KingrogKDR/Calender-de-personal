@@ -9,14 +9,6 @@ export const fetchGoals = async () => {
   return response.data;
 };
 
-export const fetchTasks = async () => {
-  const response = await axios.get(`${API_URL}/tasks`);
-  if (response.status !== 200) {
-    throw new Error(`Error fetching tasks: ${response.statusText}`);
-  }
-  return response.data;
-};
-
 export const fetchEvents = async () => {
   const response = await axios.get(`${API_URL}/events`);
   return response.data;

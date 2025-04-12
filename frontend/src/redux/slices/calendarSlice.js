@@ -22,14 +22,16 @@ export const fetchEvents = createAsyncThunk(
   }
 );
 
-export const fetchGoals = createAsyncThunk("calendar/fetchGoals", async () => {
-  return await fetchGoalsAPI();
-});
+export const fetchGoals = createAsyncThunk(
+  "calendar/fetchGoals", 
+  async () => {
+    return await fetchGoalsAPI();
+  }
+);
 
 export const createEvent = createAsyncThunk(
   "calendar/createEvent",
   async (event) => {
-    // console.log("Thunk received event:", event);
     return await createEventAPI(event);
   }
 );
@@ -63,18 +65,18 @@ const calendarSlice = createSlice({
         state.loading = true;
       })
       .addCase(fetchEvents.fulfilled, (state, action) => {
+        // Store dates as ISO strings to avoid serialization issues
         const parsedEvents = action.payload.map((event) => ({
           ...event,
-          startTime:
-            typeof event.startTime === "string"
-              ? new Date(event.startTime)
-              : event.startTime,
-          endTime:
-            typeof event.endTime === "string"
-              ? new Date(event.endTime)
-              : event.endTime,
-          date:
-            typeof event.date === "string" ? new Date(event.date) : event.date,
+          startTime: typeof event.startTime === "string" 
+            ? event.startTime 
+            : event.startTime.toISOString(),
+          endTime: typeof event.endTime === "string" 
+            ? event.endTime 
+            : event.endTime.toISOString(),
+          date: typeof event.date === "string" 
+            ? event.date 
+            : event.date.toISOString(),
         }));
 
         state.events = parsedEvents;

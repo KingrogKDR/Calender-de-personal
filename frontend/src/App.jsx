@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Calendar from "./components/Calendar/Calendar";
 
-function App() {
+const queryClient = new QueryClient();
 
+function App() {
   return (
     <>
-      <Calendar />
+      <QueryClientProvider client={queryClient}>
+        <Calendar />
+      </QueryClientProvider>
     </>
   );
 }

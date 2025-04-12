@@ -4,7 +4,7 @@ import CalendarGrid from "../CalendarGrid/CalendarGrid";
 import CalendarHeader from "../CalendarHeader/CalendarHeader";
 import EventModal from "../EventModal/EventModal";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchEvents, fetchGoals } from "../../redux/slices/calendarSlice";
+import { fetchEvents } from "../../redux/slices/calendarSlice";
 
 const Calendar = () => {
   const [showModal, setShowModal] = useState(false);
@@ -14,9 +14,11 @@ const Calendar = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
 
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState("week");
+
   useEffect(() => {
     dispatch(fetchEvents());
-    // dispatch(fetchGoals());
   }, [dispatch]);
 
   const handleDateClick = (date, hour) => {
@@ -58,14 +60,29 @@ const Calendar = () => {
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <CalendarHeader />
+        <CalendarHeader
+          currentDate={currentDate}
+          setCurrentDate={setCurrentDate}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+        />
         <CalendarGrid
           events={events}
+          currentDate={currentDate}
+          viewMode={viewMode}
           onDateClick={handleDateClick}
           onEventClick={handleEventClick}
         />
       </div>
-      {showModal && <EventModal isOpen={showModal} onClose={handleCloseModal} event={selectedEvent} initialDate={selectedDate} initialTime={selectedTime}/>}
+      {showModal && (
+        <EventModal
+          isOpen={showModal}
+          onClose={handleCloseModal}
+          event={selectedEvent}
+          initialDate={selectedDate}
+          initialTime={selectedTime}
+        />
+      )}
     </div>
   );
 };
