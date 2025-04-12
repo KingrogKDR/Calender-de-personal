@@ -4,6 +4,15 @@ import { updateEvent } from "../../redux/slices/calendarSlice";
 import CalendarEvent from "../CalendarEvent/CalendarEvent";
 import MoreModal from "../MoreModal/MoreModal";
 
+const isToday = (date) => {
+  const today = new Date();
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+};
+
 const CalendarGrid = ({
   currentDate,
   events,
@@ -16,20 +25,6 @@ const CalendarGrid = ({
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const [modalEvents, setModalEvents] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
 
   useEffect(() => {
     generateDaysForView();
@@ -40,45 +35,37 @@ const CalendarGrid = ({
     let rangeLength = 1;
 
     if (viewMode === "day") {
-      // For day view, we only need the current date
       rangeLength = 1;
     } else if (viewMode === "week") {
-      // Start from Sunday of the current week
       const day = currentDate.getDay();
       startOfRange.setDate(currentDate.getDate() - day);
       rangeLength = 7;
     } else if (viewMode === "month") {
-      // Start from the first day of the month
       startOfRange = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
         1
       );
 
-      // Get the total days in the month
       rangeLength = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth() + 1,
         0
       ).getDate();
 
-      // If we want to include days from previous/next months to fill a grid
       const firstDayOfMonth = startOfRange.getDay();
       startOfRange.setDate(startOfRange.getDate() - firstDayOfMonth);
 
-      // 6 weeks (42 days) to ensure we have enough days to display a month
       rangeLength = 42;
     } else if (viewMode === "year") {
-      // For year view, we'll show all 12 months
       startOfRange = new Date(currentDate.getFullYear(), 0, 1);
-      rangeLength = 12; // We'll generate just the first day of each month
+      rangeLength = 12;
     }
 
     const dateArray = Array.from({ length: rangeLength }, (_, i) => {
       const date = new Date(startOfRange);
 
       if (viewMode === "year") {
-        // For year view, each "day" represents the first day of a month
         date.setMonth(i);
       } else {
         date.setDate(startOfRange.getDate() + i);
@@ -207,12 +194,15 @@ const CalendarGrid = ({
     e.preventDefault();
   };
 
-  // Day view rendering
   if (viewMode === "day") {
     return (
       <div className="flex flex-col flex-1 overflow-auto">
         <div className="border-b border-gray-400/70 p-4 text-center">
-          <h2 className="text-xl font-semibold">
+          <h2
+            className={`text-xl font-semibold ${
+              isToday(days[0]) ? "text-blue-600" : ""
+            }`}
+          >
             {days[0]?.toLocaleDateString("en-US", {
               weekday: "long",
               month: "long",
@@ -232,7 +222,7 @@ const CalendarGrid = ({
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, days[0], hour)}
               >
-                <div className="w-20 p-2 text-xs text-gray-500 border-r border-gray-400/70">
+                <div className="w-24 p-2 text-xs text-gray-500 border-r border-gray-400/70">
                   {formatHour(hour)}
                 </div>
                 <div
@@ -254,10 +244,7 @@ const CalendarGrid = ({
         </div>
       </div>
     );
-  }
-
-  // Week view rendering
-  else if (viewMode === "week") {
+  } else if (viewMode === "week") {
     return (
       <div className="flex flex-col flex-1 overflow-auto">
         <div className="grid grid-cols-8 border-b border-gray-400/70">
@@ -265,7 +252,9 @@ const CalendarGrid = ({
           {days.map((day, index) => (
             <div
               key={index}
-              className="flex flex-col items-center justify-center p-2"
+              className={`flex flex-col items-center justify-center p-2 ${
+                isToday(day) ? "bg-blue-100 rounded" : ""
+              }`}
             >
               <div className="text-sm font-medium text-gray-500">
                 {formatDayLabel(day)}
@@ -334,11 +323,7 @@ const CalendarGrid = ({
         </div>
       </div>
     );
-  }
-
-  // Month view rendering
-  else if (viewMode === "month") {
-    // Calculate the number of weeks we need to display
+  } else if (viewMode === "month") {
     const weekCount = Math.ceil(days.length / 7);
 
     return (
@@ -388,8 +373,12 @@ const CalendarGrid = ({
                       onDrop={(e) => handleDrop(e, day)}
                     >
                       <div
-                        className={`text-right text-sm p-1 ${
-                          isCurrentMonth ? "font-medium" : "text-gray-400"
+                        className={`flex items-center justify-center text-right text-sm p-1 ${
+                          isToday(day)
+                            ? "text-white bg-blue-500 w-6 h-6 rounded-full text-center"
+                            : isCurrentMonth
+                            ? "font-medium"
+                            : "text-gray-400"
                         }`}
                       >
                         {day.getDate()}
@@ -425,10 +414,7 @@ const CalendarGrid = ({
         {showModal && <MoreModal events={modalEvents} onClose={closeModal} />}
       </div>
     );
-  }
-
-  // Year view rendering
-  else if (viewMode === "year") {
+  } else if (viewMode === "year") {
     return (
       <div className="flex flex-col flex-1 overflow-auto">
         <div className="text-center p-4 border-b border-gray-400/70">
@@ -442,7 +428,11 @@ const CalendarGrid = ({
             return (
               <div
                 key={index}
-                className="border rounded shadow p-2 cursor-pointer"
+                className={`border rounded shadow p-2 cursor-pointer ${
+                  index === new Date().getMonth()
+                    ? "border-blue-500 ring-2 ring-blue-300"
+                    : ""
+                }`}
                 onClick={() => {
                   const newDate = new Date(currentDate);
                   newDate.setMonth(index);
